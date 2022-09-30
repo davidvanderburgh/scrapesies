@@ -24,7 +24,7 @@ const handler = async (
         });
       }
     });
-  await page.goto('https://www.cabinsbythecaves.com/Rosewood-Lodge-Hocking-Hills.html');
+  await page.goto('https://www.ipdb.org/');
   await browser.close();
   res.status(200).json(fileNames);
 }

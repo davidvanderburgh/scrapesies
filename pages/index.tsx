@@ -23,7 +23,7 @@ export default function Web () {
       <div>
         {
           imageNames.map(
-            (image: string, index: number) => <img key={index} src={`/images/${image}`} alt="info" layout='fill'></img>
+            (image: string, index: number) => <img key={index} src={`/images/${image}`} alt="info"></img>
           )
         }
       </div>
