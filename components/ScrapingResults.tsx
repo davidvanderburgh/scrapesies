@@ -1,8 +1,8 @@
 import { ReactElement } from 'react';
-import styles from '../styles/ScrapingResults.module.scss';
-import { ImageScrapingError, ImageScrapingResults } from '../types';
+import styles from '@/styles/ScrapingResults.module.scss';
+import { ImageScrapingError, ImageScrapingResults } from '@/types';
 
-type ScrapingResultsProps = {
+export type ScrapingResultsProps = {
   imageScrapingResults: ImageScrapingResults,
 }
 

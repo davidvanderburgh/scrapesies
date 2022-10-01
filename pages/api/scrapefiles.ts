@@ -2,7 +2,7 @@ import type { NextApiRequest, NextApiResponse } from 'next'
 import puppeteer, { Browser, HTTPResponse, Page } from 'puppeteer';
 import fs, { WriteStream } from 'fs';
 import { randomUUID } from 'crypto';
-import { ImageScrapingResults, ImageScrapingError } from '../../types';
+import { ImageScrapingResults } from '@/types';
 
 const scrubFileName = (fileName: string): string => {
   let result = fileName.replaceAll(/%[0-9]+/gm, '').split('?')[0];
