@@ -2,15 +2,16 @@ import type { NextApiRequest, NextApiResponse } from 'next'
 import puppeteer, { Browser, HTTPResponse, Page } from 'puppeteer';
 import fs, { WriteStream } from 'fs';
 import { randomUUID } from 'crypto';
+import { ImageScrapingResults, ImageScrapingError } from '../../types';
 
 const scrubFileName = (fileName: string): string => {
   let result = fileName.replaceAll(/%[0-9]+/gm, '').split('?')[0];
   const fileExtension: string = result.slice(result.lastIndexOf('.') + 1);
   if (fileExtension === result) {
-    throw Error('no file extension');
+    throw Error(`no file extension`, { cause: fileName });
   }
   if (fileExtension.length > 4) {
-    throw Error('invalid file extension');
+    throw Error(`invalid file extension ${fileExtension}`, { cause: fileName });
   }
 
   if (result.length > 30) {
@@ -22,11 +23,14 @@ const scrubFileName = (fileName: string): string => {
 
 const handler = async (
   req: NextApiRequest,
-  res: NextApiResponse<string[]>
+  res: NextApiResponse<ImageScrapingResults>
 ): Promise<void> => {
   const browser: Browser = await puppeteer.launch();
   const page: Page = await browser.newPage();
-  const fileNames: string[] = [];
+  const imageScrapingResults: ImageScrapingResults = {
+    imageNames: [],
+    errors: [],
+  };
 
   page
     .on('response', async (response: HTTPResponse) => {
@@ -37,17 +41,28 @@ const handler = async (
           const filePath: string = `./public/images/${fileName}`;
           const writeStream: WriteStream = fs.createWriteStream(filePath);
           writeStream.write(imageBuffer);
-          fileNames.push(fileName);
+          imageScrapingResults.imageNames.push(fileName);
         }
       } catch(error) {
-        console.log('failed to write file', (error as Error).message);
+        imageScrapingResults.errors.push({
+          message: 'failed to write file',
+          reason: (error as Error).message,
+          file: ((error as Error).cause as string),
+        });
       }
     });
 
-  console.log('going to', req.query.urlToScrape);
-  await page.goto(req.query.urlToScrape as string, { waitUntil: 'networkidle2'});
-  await browser.close();
-  res.status(200).json(fileNames);
-}
+  try {
+    await page.goto(req.query.urlToScrape as string, { waitUntil: 'networkidle2'});
+    await browser.close();
+    res.status(200).json(imageScrapingResults);
+  } catch (error) {
+    imageScrapingResults.errors.push({
+      message: 'failed to go to url',
+      reason: (error as Error).message,
+    });
+    res.status(500).json(imageScrapingResults);
+  }
+};
 
 export default handler;
