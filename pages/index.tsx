@@ -1,32 +1,62 @@
-import { useEffect, useState } from 'react';
+import { ChangeEvent, FormEvent, useEffect, useState } from 'react';
 import styles from '../styles/Home.module.css';
 import axios, { AxiosResponse } from 'axios';
+import { LoadingSpinner } from '../components/LoadingSpinner';
 
 export default function Web () {
-  const [isImagesFetched, setIsImagesFetched] = useState<boolean>(false);
   const [imageNames, setImageNames] = useState<string[]>([]);
+  const [urlToScrape, setUrlToScrape] = useState<string>('http://www.google.com');
+  const [isLoading, setIsLoading] = useState<boolean>(false);
 
-  const fetchImages = async () => {
-    if (!isImagesFetched) {
-      const response: AxiosResponse<string[]> = await axios.get('/api/hello');
-      setIsImagesFetched(true);
-      setImageNames(response.data);
-    }
+  const handleSubmit = async (event: FormEvent) => {
+    event.preventDefault();
+    setIsLoading(true);
+    setImageNames([]);
+    const response: AxiosResponse<string[]> = await axios.get(
+      '/api/scrapefiles',
+      { params: { urlToScrape: urlToScrape } },
+    );
+    setImageNames(response.data);
+    setIsLoading(false);
   };
 
-  useEffect(() => {
-    fetchImages();
-  });
-
-  return isImagesFetched
-    ? 
-      <div>
-        {
-          imageNames.map(
-            (image: string, index: number) => <img key={index} src={`/images/${image}`} alt="info"></img>
-          )
-        }
-      </div>
-    :
-      <span>Loading Images</span>;
+  return (
+    <div>
+      <form onSubmit={handleSubmit}>
+      <label>
+        Url to scrape:
+        <input
+          id="urlToScrape"
+          name="urlToScrape"
+          type="text"
+          onChange={(event: ChangeEvent<HTMLInputElement>) => setUrlToScrape(event.target.value)}
+          value={urlToScrape}
+        />
+      </label>
+      <input type="submit" value="Submit"/>
+    </form>
+    {isLoading
+      ?
+        <>
+          <LoadingSpinner />
+          <span>loading man...</span>
+        </>
+      :
+        <span/>
+    }
+    <div className={styles.imagesContainer}>
+      {
+        imageNames.map((image: string, index: number) =>
+          <picture id={styles.picture} key={index} title={image}>
+            <img
+              alt={image}
+              src={`/images/${image}`}
+            />
+            <p>{image}</p>
+          </picture>
+        )
+      }
+    </div>
+  </div>
+  );
 }

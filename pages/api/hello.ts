@@ -15,16 +15,20 @@ const handler = async (
     .on('response', async (response: HTTPResponse) => {
       const url: string = response.url();
       if (response.request().resourceType() === 'image') {
-        response.buffer().then((file: Buffer) => {
-          const fileName: string = url.split('/').pop() ?? '';
-          const filePath: string = `./public/images/${fileName}`;
-          const writeStream: WriteStream = fs.createWriteStream(filePath);
-          writeStream.write(file);
-          fileNames.push(fileName);
-        });
+        response.buffer()
+          .then((file: Buffer) => {
+            const fileName: string = url.split('/').pop() ?? '';
+            const filePath: string = `./public/images/${fileName}`;
+            const writeStream: WriteStream = fs.createWriteStream(filePath);
+            writeStream.write(file);
+            fileNames.push(fileName);
+          })
+          .catch((reason: Error) => {
+            console.log('failed to write file', reason.message);
+          });
       }
     });
-  await page.goto('https://www.ipdb.org/');
+  await page.goto(req.query.urlToScrape as string, { waitUntil: 'networkidle2'});
   await browser.close();
   res.status(200).json(fileNames);
 }

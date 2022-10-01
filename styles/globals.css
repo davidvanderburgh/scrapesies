@@ -1,3 +1,5 @@
+@import "~react-image-gallery/styles/css/image-gallery.css";
+
 html,
 body {
   padding: 0;
@@ -21,6 +23,6 @@ a {
   }
   body {
     color: white;
-    background: black;
+    background: rgb(43, 43, 43);
   }
 }
