@@ -21,7 +21,7 @@ export const ScrapingRequest = (
     const response: AxiosResponse<ImageScrapingResults> = await axios.get(
       '/api/scrapefiles',
       { 
-        params: { urlToScrape: urlToScrape },
+        params: { urlToScrape },
         validateStatus: () => true,
       },
     );
