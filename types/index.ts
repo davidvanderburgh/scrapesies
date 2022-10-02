@@ -4,7 +4,13 @@ export type ImageScrapingError = {
   file?: string,
 }
 
+export type Image = {
+  name: string,
+  extension: string,
+  data: Buffer,
+}
+
 export type ImageScrapingResults = {
-  imageNames: string[],
+  images: Image[],
   errors: ImageScrapingError[],
 }

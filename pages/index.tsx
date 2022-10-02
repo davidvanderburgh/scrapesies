@@ -5,7 +5,7 @@ import { ScrapingRequest } from '@/components/ScrapingRequest';
 
 export const HomePage = () => {
   const [imageScrapingResults, setImageScrapingResults] =
-    useState<ImageScrapingResults>({ imageNames: [], errors: [] });
+    useState<ImageScrapingResults>({ images: [], errors: [] });
 
   return (
     <div>

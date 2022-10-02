@@ -2,8 +2,21 @@
   display: flex;
   flex-direction: column;
   margin: 20px;
+
+  .downloadAllButton {
+    all: unset;
+    width: 200px;
+    border: 1px solid gray;
+    border-radius: 4px;
+    text-align: center;
+    background-color: lightgreen;
+    margin-bottom: 20px;
+  }
   
   .successfulImageResult {
+    position: relative;
+    width: 100%;
+    padding-bottom: 20%;
     border: 1px solid green;
     border-radius: 4px;
     padding: 10px;

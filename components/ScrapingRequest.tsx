@@ -14,10 +14,10 @@ export const ScrapingRequest = (
   const [urlToScrape, setUrlToScrape] = useState<string>('http://www.google.com');
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
-  const handleSubmit = async (event: FormEvent) => {
+  const handleSubmit = async (event: FormEvent): Promise<void> => {
     event.preventDefault();
     setIsLoading(true);
-    setImageScrapingResults({ imageNames: [], errors: [] });
+    setImageScrapingResults({ images: [], errors: [] });
     const response: AxiosResponse<ImageScrapingResults> = await axios.get(
       '/api/scrapefiles',
       { 

@@ -1,17 +1,16 @@
 import type { NextApiRequest, NextApiResponse } from 'next'
 import puppeteer, { Browser, HTTPResponse, Page } from 'puppeteer';
-import fs, { WriteStream } from 'fs';
 import { randomUUID } from 'crypto';
 import { ImageScrapingResults } from '@/types';
 
-const scrubFileName = (fileName: string): string => {
+export const scrubFileName = (fileName: string): string => {
   let result = fileName.replaceAll(/%[0-9]+/gm, '').split('?')[0];
   const fileExtension: string = result.slice(result.lastIndexOf('.') + 1);
   if (fileExtension === result) {
     throw Error(`no file extension`, { cause: fileName });
   }
   if (fileExtension.length > 4) {
-    throw Error(`invalid file extension ${fileExtension}`, { cause: fileName });
+    throw Error(`invalid file extension .${fileExtension}`, { cause: fileName });
   }
 
   if (result.length > 30) {
@@ -21,36 +20,43 @@ const scrubFileName = (fileName: string): string => {
   return result;
 };
 
-const handler = async (
+export const downloadImage = async (options: {
+  response: HTTPResponse,
+  imageScrapingResults: ImageScrapingResults,
+}): Promise<void> => {
+  const { response, imageScrapingResults } = options;
+  if (response.request().resourceType() !== 'image') {
+    return;
+  }
+  try {
+    const imageBuffer: Buffer = await response.buffer();
+    const fileName: string = scrubFileName(response.url().split('/').pop() ?? '');
+    const fileExtension: string = fileName.slice(fileName.lastIndexOf('.') + 1);
+    imageScrapingResults.images.push({ name: fileName, extension: fileExtension, data: imageBuffer });
+  } catch(error) {
+    imageScrapingResults.errors.push({
+      message: 'failed to get image',
+      reason: (error as Error).message,
+      file: ((error as Error).cause as string),
+    });
+  }
+};
+
+export const imageScrapingRequestHandler = async (
   req: NextApiRequest,
   res: NextApiResponse<ImageScrapingResults>
 ): Promise<void> => {
   const browser: Browser = await puppeteer.launch();
   const page: Page = await browser.newPage();
   const imageScrapingResults: ImageScrapingResults = {
-    imageNames: [],
+    images: [],
     errors: [],
   };
 
-  page
-    .on('response', async (response: HTTPResponse) => {
-      try {
-        if (response.request().resourceType() === 'image') {
-          const imageBuffer: Buffer = await response.buffer();
-          const fileName: string = scrubFileName(response.url().split('/').pop() ?? '');
-          const filePath: string = `./public/images/${fileName}`;
-          const writeStream: WriteStream = fs.createWriteStream(filePath);
-          writeStream.write(imageBuffer);
-          imageScrapingResults.imageNames.push(fileName);
-        }
-      } catch(error) {
-        imageScrapingResults.errors.push({
-          message: 'failed to write file',
-          reason: (error as Error).message,
-          file: ((error as Error).cause as string),
-        });
-      }
-    });
+  page.on(
+    'response',
+    async (response: HTTPResponse) => downloadImage({ response, imageScrapingResults }),
+  );
 
   try {
     await page.goto(req.query.urlToScrape as string, { waitUntil: 'networkidle2'});
@@ -65,4 +71,4 @@ const handler = async (
   }
 };
 
-export default handler;
+export default imageScrapingRequestHandler;
