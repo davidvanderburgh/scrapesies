@@ -20,10 +20,16 @@ const downloadImages = async (imageScrapingResults: ImageScrapingResults): Promi
 const getImageSrc = (image: Image): string =>
   `data:image${image.extension === 'svg' ? '/svg+xml' : ''};base64,${Buffer.from(image.data).toString('base64')}`;
 
-const ScrapingImages = ({ imageScrapingImages }: { imageScrapingImages: Image[] }): ReactElement => (
+const ScrapingImages = ({ imageScrapingResults }: { imageScrapingResults: ImageScrapingResults }): ReactElement => (
   <>
+    {imageScrapingResults.images.length !== 0 &&
+      <button
+        className={styles.downloadAllButton}
+        onClick={() => downloadImages(imageScrapingResults)}
+      >Download All</button>
+    }
     {
-      imageScrapingImages.map((image: Image, index: number) =>
+      imageScrapingResults.images.map((image: Image, index: number) =>
         <picture
           key={index}
           className={styles.successfulImageResult}
@@ -70,11 +76,7 @@ const ScrapingErrors = ({ imageScrapingErrors }: { imageScrapingErrors: ImageScr
 
 export const ScrapingResults = ({ imageScrapingResults }: ScrapingResultsProps): ReactElement => (
   <div className={styles.scrapingResultsContainer}>
-    <button
-      className={styles.downloadAllButton}
-      onClick={() => downloadImages(imageScrapingResults)}
-    >Download All</button>
-    <ScrapingImages imageScrapingImages={imageScrapingResults.images} />
+    <ScrapingImages imageScrapingResults={imageScrapingResults} />
     <ScrapingErrors imageScrapingErrors={imageScrapingResults.errors} />
   </div>
 );
