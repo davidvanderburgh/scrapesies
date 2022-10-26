@@ -1,23 +1,21 @@
 import axios, { AxiosResponse } from 'axios';
-import { ChangeEvent, Dispatch, FormEvent, ReactElement, SetStateAction, useState } from 'react';
+import { ChangeEvent, Dispatch, FormEvent, ReactElement, useState } from 'react';
 import styles from '@/styles/ScrapingRequest.module.scss';
 import { ImageScrapingResults } from '@/types';
 import { LoadingSpinner } from '@/components/LoadingSpinner';
+import { useDispatch } from 'react-redux';
+import { AnyAction } from '@reduxjs/toolkit';
+import { setImageScrapings } from '@/store/imageScrapings';
 
-type ScrapingRequestProps = {
-  setImageScrapingResults: Dispatch<SetStateAction<ImageScrapingResults>>,
-}
-
-export const ScrapingRequest = (
-  { setImageScrapingResults }: ScrapingRequestProps,
-): ReactElement => {
+export const ScrapingRequest = (): ReactElement => {
   const [urlToScrape, setUrlToScrape] = useState<string>('http://www.google.com');
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const dispatch: Dispatch<AnyAction> = useDispatch();
 
   const handleSubmit = async (event: FormEvent): Promise<void> => {
     event.preventDefault();
     setIsLoading(true);
-    setImageScrapingResults({ images: [], errors: [] });
+    dispatch(setImageScrapings({ images: [], errors: [] }));
     const response: AxiosResponse<ImageScrapingResults> = await axios.get(
       '/api/scrapefiles',
       { 
@@ -25,8 +23,8 @@ export const ScrapingRequest = (
         validateStatus: () => true,
       },
     );
-    setImageScrapingResults(response.data);
     setIsLoading(false);
+    dispatch(setImageScrapings(response.data));
   };
   
   return (
@@ -51,4 +49,4 @@ export const ScrapingRequest = (
       </form>
     </div>
   )
-}
+};

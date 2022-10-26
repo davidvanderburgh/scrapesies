@@ -1,8 +1,10 @@
-import { ReactElement, useState } from 'react';
+import { ReactElement } from 'react';
 import styles from '@/styles/ScrapingResults.module.scss';
 import { Image, ImageScrapingError, ImageScrapingResults } from '@/types';
 import { saveAs }  from 'file-saver';
 import Zip from 'jszip';
+import { useSelector } from 'react-redux';
+import { RooteState } from '@/store';
 
 export type ScrapingResultsProps = {
   imageScrapingResults: ImageScrapingResults,
@@ -74,9 +76,14 @@ const ScrapingErrors = ({ imageScrapingErrors }: { imageScrapingErrors: ImageScr
   </>
 );
 
-export const ScrapingResults = ({ imageScrapingResults }: ScrapingResultsProps): ReactElement => (
-  <div className={styles.scrapingResultsContainer}>
-    <ScrapingImages imageScrapingResults={imageScrapingResults} />
-    <ScrapingErrors imageScrapingErrors={imageScrapingResults.errors} />
-  </div>
-);
+export const ScrapingResults = (): ReactElement => {
+  const images: ImageScrapingResults =
+    useSelector((state: RooteState) => state.imageScrapings.value);
+
+  return (
+    <div className={styles.scrapingResultsContainer}>
+      <ScrapingImages imageScrapingResults={images} />
+      <ScrapingErrors imageScrapingErrors={images.errors} />
+    </div>
+  );
+};

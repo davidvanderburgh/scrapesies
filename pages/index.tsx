@@ -1,17 +1,14 @@
-import { useState } from 'react';
-import { ImageScrapingResults } from '@/types';
 import { ScrapingResults } from '@/components/ScrapingResults';
 import { ScrapingRequest } from '@/components/ScrapingRequest';
+import { Provider } from 'react-redux';
+import { store } from '@/store';
 
 export const HomePage = () => {
-  const [imageScrapingResults, setImageScrapingResults] =
-    useState<ImageScrapingResults>({ images: [], errors: [] });
-
   return (
-    <div>
-      <ScrapingRequest setImageScrapingResults={setImageScrapingResults} />
-      <ScrapingResults imageScrapingResults={imageScrapingResults} />
-    </div>
+    <Provider store={store}>
+      <ScrapingRequest />
+      <ScrapingResults />
+    </Provider>
   );
 };
 
